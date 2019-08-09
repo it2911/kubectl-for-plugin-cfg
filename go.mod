@@ -1,6 +1,6 @@
 // This is a generated file. Do not edit directly.
 
-module k8s.io/kubectl
+module github.com/it2911/kubectl-for-plugin-cfg
 
 go 1.12
 
