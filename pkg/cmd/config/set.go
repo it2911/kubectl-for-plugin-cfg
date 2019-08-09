@@ -33,11 +33,11 @@ import (
 	"k8s.io/kubectl/pkg/util/templates"
 )
 
-type setOptions struct {
-	configAccess  clientcmd.ConfigAccess
-	propertyName  string
-	propertyValue string
-	setRawBytes   cliflag.Tristate
+type SetOptions struct {
+	ConfigAccess  clientcmd.ConfigAccess
+	PropertyName  string
+	PropertyValue string
+	SetRawBytes   cliflag.Tristate
 }
 
 var (
@@ -66,7 +66,7 @@ var (
 
 // NewCmdConfigSet returns a Command instance for 'config set' sub command
 func NewCmdConfigSet(out io.Writer, configAccess clientcmd.ConfigAccess) *cobra.Command {
-	options := &setOptions{configAccess: configAccess}
+	options := &SetOptions{ConfigAccess: configAccess}
 
 	cmd := &cobra.Command{
 		Use:                   "set PROPERTY_NAME PROPERTY_VALUE",
@@ -75,73 +75,73 @@ func NewCmdConfigSet(out io.Writer, configAccess clientcmd.ConfigAccess) *cobra.
 		Long:                  setLong,
 		Example:               setExample,
 		Run: func(cmd *cobra.Command, args []string) {
-			cmdutil.CheckErr(options.complete(cmd))
-			cmdutil.CheckErr(options.run())
-			fmt.Fprintf(out, "Property %q set.\n", options.propertyName)
+			cmdutil.CheckErr(options.Complete(cmd))
+			cmdutil.CheckErr(options.Run())
+			fmt.Fprintf(out, "Property %q set.\n", options.PropertyName)
 		},
 	}
 
-	f := cmd.Flags().VarPF(&options.setRawBytes, "set-raw-bytes", "", "When writing a []byte PROPERTY_VALUE, write the given string directly without base64 decoding.")
+	f := cmd.Flags().VarPF(&options.SetRawBytes, "set-raw-bytes", "", "When writing a []byte PROPERTY_VALUE, write the given string directly without base64 decoding.")
 	f.NoOptDefVal = "true"
 	return cmd
 }
 
-func (o setOptions) run() error {
-	err := o.validate()
+func (o SetOptions) Run() error {
+	err := o.Validate()
 	if err != nil {
 		return err
 	}
 
-	config, err := o.configAccess.GetStartingConfig()
+	config, err := o.ConfigAccess.GetStartingConfig()
 	if err != nil {
 		return err
 	}
-	steps, err := newNavigationSteps(o.propertyName)
+	steps, err := newNavigationSteps(o.PropertyName)
 	if err != nil {
 		return err
 	}
 
 	setRawBytes := false
-	if o.setRawBytes.Provided() {
-		setRawBytes = o.setRawBytes.Value()
+	if o.SetRawBytes.Provided() {
+		setRawBytes = o.SetRawBytes.Value()
 	}
 
-	err = modifyConfig(reflect.ValueOf(config), steps, o.propertyValue, false, setRawBytes)
+	err = ModifyConfig(reflect.ValueOf(config), steps, o.PropertyValue, false, setRawBytes)
 	if err != nil {
 		return err
 	}
 
-	if err := clientcmd.ModifyConfig(o.configAccess, *config, false); err != nil {
+	if err := clientcmd.ModifyConfig(o.ConfigAccess, *config, false); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (o *setOptions) complete(cmd *cobra.Command) error {
+func (o *SetOptions) Complete(cmd *cobra.Command) error {
 	endingArgs := cmd.Flags().Args()
 	if len(endingArgs) != 2 {
 		return helpErrorf(cmd, "Unexpected args: %v", endingArgs)
 	}
 
-	o.propertyValue = endingArgs[1]
-	o.propertyName = endingArgs[0]
+	o.PropertyValue = endingArgs[1]
+	o.PropertyName = endingArgs[0]
 	return nil
 }
 
-func (o setOptions) validate() error {
-	if len(o.propertyValue) == 0 {
+func (o SetOptions) Validate() error {
+	if len(o.PropertyValue) == 0 {
 		return errors.New("you cannot use set to unset a property")
 	}
 
-	if len(o.propertyName) == 0 {
+	if len(o.PropertyName) == 0 {
 		return errors.New("you must specify a property")
 	}
 
 	return nil
 }
 
-func modifyConfig(curr reflect.Value, steps *navigationSteps, propertyValue string, unset bool, setRawBytes bool) error {
+func ModifyConfig(curr reflect.Value, steps *navigationSteps, propertyValue string, unset bool, setRawBytes bool) error {
 	currStep := steps.pop()
 
 	actualCurrValue := curr
@@ -174,7 +174,7 @@ func modifyConfig(curr reflect.Value, steps *navigationSteps, propertyValue stri
 			actualCurrValue.SetMapIndex(mapKey, currMapValue)
 		}
 
-		err := modifyConfig(currMapValue, steps, propertyValue, unset, setRawBytes)
+		err := ModifyConfig(currMapValue, steps, propertyValue, unset, setRawBytes)
 		if err != nil {
 			return err
 		}
@@ -250,7 +250,7 @@ func modifyConfig(curr reflect.Value, steps *navigationSteps, propertyValue stri
 					return nil
 				}
 
-				return modifyConfig(currFieldValue.Addr(), steps, propertyValue, unset, setRawBytes)
+				return ModifyConfig(currFieldValue.Addr(), steps, propertyValue, unset, setRawBytes)
 			}
 		}
 

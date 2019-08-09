@@ -30,9 +30,9 @@ import (
 
 // RenameContextOptions contains the options for running the rename-context cli command.
 type RenameContextOptions struct {
-	configAccess clientcmd.ConfigAccess
-	contextName  string
-	newName      string
+	ConfigAccess clientcmd.ConfigAccess
+	ContextName  string
+	NewName      string
 }
 
 const (
