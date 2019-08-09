@@ -58,7 +58,7 @@ var (
 
 // NewCmdConfigRenameContext creates a command object for the "rename-context" action
 func NewCmdConfigRenameContext(out io.Writer, configAccess clientcmd.ConfigAccess) *cobra.Command {
-	options := &RenameContextOptions{configAccess: configAccess}
+	options := &RenameContextOptions{ConfigAccess: configAccess}
 
 	cmd := &cobra.Command{
 		Use:                   renameContextUse,
@@ -81,14 +81,14 @@ func (o *RenameContextOptions) Complete(cmd *cobra.Command, args []string, out i
 		return helpErrorf(cmd, "Unexpected args: %v", args)
 	}
 
-	o.contextName = args[0]
-	o.newName = args[1]
+	o.ContextName = args[0]
+	o.NewName = args[1]
 	return nil
 }
 
 // Validate makes sure that provided values for command-line options are valid
 func (o RenameContextOptions) Validate() error {
-	if len(o.newName) == 0 {
+	if len(o.NewName) == 0 {
 		return errors.New("You must specify a new non-empty context name")
 	}
 	return nil
@@ -96,37 +96,37 @@ func (o RenameContextOptions) Validate() error {
 
 // RunRenameContext performs the execution for 'config rename-context' sub command
 func (o RenameContextOptions) RunRenameContext(out io.Writer) error {
-	config, err := o.configAccess.GetStartingConfig()
+	config, err := o.ConfigAccess.GetStartingConfig()
 	if err != nil {
 		return err
 	}
 
-	configFile := o.configAccess.GetDefaultFilename()
-	if o.configAccess.IsExplicitFile() {
-		configFile = o.configAccess.GetExplicitFile()
+	configFile := o.ConfigAccess.GetDefaultFilename()
+	if o.ConfigAccess.IsExplicitFile() {
+		configFile = o.ConfigAccess.GetExplicitFile()
 	}
 
-	context, exists := config.Contexts[o.contextName]
+	context, exists := config.Contexts[o.ContextName]
 	if !exists {
-		return fmt.Errorf("cannot rename the context %q, it's not in %s", o.contextName, configFile)
+		return fmt.Errorf("cannot rename the context %q, it's not in %s", o.ContextName, configFile)
 	}
 
-	_, newExists := config.Contexts[o.newName]
+	_, newExists := config.Contexts[o.NewName]
 	if newExists {
-		return fmt.Errorf("cannot rename the context %q, the context %q already exists in %s", o.contextName, o.newName, configFile)
+		return fmt.Errorf("cannot rename the context %q, the context %q already exists in %s", o.ContextName, o.NewName, configFile)
 	}
 
-	config.Contexts[o.newName] = context
-	delete(config.Contexts, o.contextName)
+	config.Contexts[o.NewName] = context
+	delete(config.Contexts, o.ContextName)
 
-	if config.CurrentContext == o.contextName {
-		config.CurrentContext = o.newName
+	if config.CurrentContext == o.ContextName {
+		config.CurrentContext = o.NewName
 	}
 
-	if err := clientcmd.ModifyConfig(o.configAccess, *config, true); err != nil {
+	if err := clientcmd.ModifyConfig(o.ConfigAccess, *config, true); err != nil {
 		return err
 	}
 
-	fmt.Fprintf(out, "Context %q renamed to %q.\n", o.contextName, o.newName)
+	fmt.Fprintf(out, "Context %q renamed to %q.\n", o.ContextName, o.NewName)
 	return nil
 }
