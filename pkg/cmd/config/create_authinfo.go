@@ -153,12 +153,12 @@ func newCmdConfigSetAuthInfo(out io.Writer, options *CreateAuthInfoOptions) *cob
 		Long:                  createAuthInfoLong,
 		Example:               createAuthInfoExample,
 		Run: func(cmd *cobra.Command, args []string) {
-			err := options.complete(cmd, out)
+			err := options.Complete(cmd, out)
 			if err != nil {
 				cmd.Help()
 				cmdutil.CheckErr(err)
 			}
-			cmdutil.CheckErr(options.run())
+			cmdutil.CheckErr(options.Run())
 			fmt.Fprintf(out, "User %q set.\n", options.Name)
 		},
 	}
@@ -182,7 +182,7 @@ func newCmdConfigSetAuthInfo(out io.Writer, options *CreateAuthInfoOptions) *cob
 	return cmd
 }
 
-func (o CreateAuthInfoOptions) run() error {
+func (o CreateAuthInfoOptions) Run() error {
 	err := o.validate()
 	if err != nil {
 		return err
@@ -356,7 +356,7 @@ func (o *CreateAuthInfoOptions) modifyAuthInfo(existingAuthInfo clientcmdapi.Aut
 	return modifiedAuthInfo
 }
 
-func (o *CreateAuthInfoOptions) complete(cmd *cobra.Command, out io.Writer) error {
+func (o *CreateAuthInfoOptions) Complete(cmd *cobra.Command, out io.Writer) error {
 	args := cmd.Flags().Args()
 	if len(args) != 1 {
 		return fmt.Errorf("Unexpected args: %v", args)
