@@ -34,36 +34,36 @@ import (
 	"k8s.io/kubectl/pkg/util/templates"
 )
 
-type createAuthInfoOptions struct {
-	configAccess      clientcmd.ConfigAccess
-	name              string
-	authPath          cliflag.StringFlag
-	clientCertificate cliflag.StringFlag
-	clientKey         cliflag.StringFlag
-	token             cliflag.StringFlag
-	username          cliflag.StringFlag
-	password          cliflag.StringFlag
-	embedCertData     cliflag.Tristate
-	authProvider      cliflag.StringFlag
+type CreateAuthInfoOptions struct {
+	ConfigAccess      clientcmd.ConfigAccess
+	Name              string
+	AuthPath          cliflag.StringFlag
+	ClientCertificate cliflag.StringFlag
+	ClientKey         cliflag.StringFlag
+	Token             cliflag.StringFlag
+	Username          cliflag.StringFlag
+	Password          cliflag.StringFlag
+	EmbedCertData     cliflag.Tristate
+	AuthProvider      cliflag.StringFlag
 
-	authProviderArgs         map[string]string
-	authProviderArgsToRemove []string
+	AuthProviderArgs         map[string]string
+	AuthProviderArgsToRemove []string
 
-	execCommand     cliflag.StringFlag
-	execAPIVersion  cliflag.StringFlag
-	execArgs        []string
-	execEnv         map[string]string
-	execEnvToRemove []string
+	ExecCommand     cliflag.StringFlag
+	ExecAPIVersion  cliflag.StringFlag
+	ExecArgs        []string
+	ExecEnv         map[string]string
+	ExecEnvToRemove []string
 }
 
 const (
-	flagAuthProvider    = "auth-provider"
-	flagAuthProviderArg = "auth-provider-arg"
+	FlagAuthProvider    = "auth-provider"
+	FlagAuthProviderArg = "auth-provider-arg"
 
-	flagExecCommand    = "exec-command"
-	flagExecAPIVersion = "exec-api-version"
-	flagExecArg        = "exec-arg"
-	flagExecEnv        = "exec-env"
+	FlagExecCommand    = "exec-command"
+	FlagExecAPIVersion = "exec-api-version"
+	FlagExecArg        = "exec-arg"
+	FlagExecEnv        = "exec-env"
 )
 
 var (
@@ -118,11 +118,11 @@ var (
 
 // NewCmdConfigSetAuthInfo returns an Command option instance for 'config set-credentials' sub command
 func NewCmdConfigSetAuthInfo(out io.Writer, configAccess clientcmd.ConfigAccess) *cobra.Command {
-	options := &createAuthInfoOptions{configAccess: configAccess}
+	options := &CreateAuthInfoOptions{ConfigAccess: configAccess}
 	return newCmdConfigSetAuthInfo(out, options)
 }
 
-func newCmdConfigSetAuthInfo(out io.Writer, options *createAuthInfoOptions) *cobra.Command {
+func newCmdConfigSetAuthInfo(out io.Writer, options *CreateAuthInfoOptions) *cobra.Command {
 	cmd := &cobra.Command{
 		Use: fmt.Sprintf(
 			"set-credentials NAME [--%v=path/to/certfile] "+
@@ -141,12 +141,12 @@ func newCmdConfigSetAuthInfo(out io.Writer, options *createAuthInfoOptions) *cob
 			clientcmd.FlagBearerToken,
 			clientcmd.FlagUsername,
 			clientcmd.FlagPassword,
-			flagAuthProvider,
-			flagAuthProviderArg,
-			flagExecCommand,
-			flagExecAPIVersion,
-			flagExecArg,
-			flagExecEnv,
+			FlagAuthProvider,
+			FlagAuthProviderArg,
+			FlagExecCommand,
+			FlagExecAPIVersion,
+			FlagExecArg,
+			FlagExecEnv,
 		),
 		DisableFlagsInUseLine: true,
 		Short:                 i18n.T("Sets a user entry in kubeconfig"),
@@ -159,48 +159,48 @@ func newCmdConfigSetAuthInfo(out io.Writer, options *createAuthInfoOptions) *cob
 				cmdutil.CheckErr(err)
 			}
 			cmdutil.CheckErr(options.run())
-			fmt.Fprintf(out, "User %q set.\n", options.name)
+			fmt.Fprintf(out, "User %q set.\n", options.Name)
 		},
 	}
 
-	cmd.Flags().Var(&options.clientCertificate, clientcmd.FlagCertFile, "Path to "+clientcmd.FlagCertFile+" file for the user entry in kubeconfig")
+	cmd.Flags().Var(&options.ClientCertificate, clientcmd.FlagCertFile, "Path to "+clientcmd.FlagCertFile+" file for the user entry in kubeconfig")
 	cmd.MarkFlagFilename(clientcmd.FlagCertFile)
-	cmd.Flags().Var(&options.clientKey, clientcmd.FlagKeyFile, "Path to "+clientcmd.FlagKeyFile+" file for the user entry in kubeconfig")
+	cmd.Flags().Var(&options.ClientKey, clientcmd.FlagKeyFile, "Path to "+clientcmd.FlagKeyFile+" file for the user entry in kubeconfig")
 	cmd.MarkFlagFilename(clientcmd.FlagKeyFile)
-	cmd.Flags().Var(&options.token, clientcmd.FlagBearerToken, clientcmd.FlagBearerToken+" for the user entry in kubeconfig")
-	cmd.Flags().Var(&options.username, clientcmd.FlagUsername, clientcmd.FlagUsername+" for the user entry in kubeconfig")
-	cmd.Flags().Var(&options.password, clientcmd.FlagPassword, clientcmd.FlagPassword+" for the user entry in kubeconfig")
-	cmd.Flags().Var(&options.authProvider, flagAuthProvider, "Auth provider for the user entry in kubeconfig")
-	cmd.Flags().StringSlice(flagAuthProviderArg, nil, "'key=value' arguments for the auth provider")
-	cmd.Flags().Var(&options.execCommand, flagExecCommand, "Command for the exec credential plugin for the user entry in kubeconfig")
-	cmd.Flags().Var(&options.execAPIVersion, flagExecAPIVersion, "API version of the exec credential plugin for the user entry in kubeconfig")
-	cmd.Flags().StringSlice(flagExecArg, nil, "New arguments for the exec credential plugin command for the user entry in kubeconfig")
-	cmd.Flags().StringArray(flagExecEnv, nil, "'key=value' environment values for the exec credential plugin")
-	f := cmd.Flags().VarPF(&options.embedCertData, clientcmd.FlagEmbedCerts, "", "Embed client cert/key for the user entry in kubeconfig")
+	cmd.Flags().Var(&options.Token, clientcmd.FlagBearerToken, clientcmd.FlagBearerToken+" for the user entry in kubeconfig")
+	cmd.Flags().Var(&options.Username, clientcmd.FlagUsername, clientcmd.FlagUsername+" for the user entry in kubeconfig")
+	cmd.Flags().Var(&options.Password, clientcmd.FlagPassword, clientcmd.FlagPassword+" for the user entry in kubeconfig")
+	cmd.Flags().Var(&options.AuthProvider, FlagAuthProvider, "Auth provider for the user entry in kubeconfig")
+	cmd.Flags().StringSlice(FlagAuthProviderArg, nil, "'key=value' arguments for the auth provider")
+	cmd.Flags().Var(&options.ExecCommand, FlagExecCommand, "Command for the exec credential plugin for the user entry in kubeconfig")
+	cmd.Flags().Var(&options.ExecAPIVersion, FlagExecAPIVersion, "API version of the exec credential plugin for the user entry in kubeconfig")
+	cmd.Flags().StringSlice(FlagExecArg, nil, "New arguments for the exec credential plugin command for the user entry in kubeconfig")
+	cmd.Flags().StringArray(FlagExecEnv, nil, "'key=value' environment values for the exec credential plugin")
+	f := cmd.Flags().VarPF(&options.EmbedCertData, clientcmd.FlagEmbedCerts, "", "Embed client cert/key for the user entry in kubeconfig")
 	f.NoOptDefVal = "true"
 
 	return cmd
 }
 
-func (o createAuthInfoOptions) run() error {
+func (o CreateAuthInfoOptions) run() error {
 	err := o.validate()
 	if err != nil {
 		return err
 	}
 
-	config, err := o.configAccess.GetStartingConfig()
+	config, err := o.ConfigAccess.GetStartingConfig()
 	if err != nil {
 		return err
 	}
 
-	startingStanza, exists := config.AuthInfos[o.name]
+	startingStanza, exists := config.AuthInfos[o.Name]
 	if !exists {
 		startingStanza = clientcmdapi.NewAuthInfo()
 	}
 	authInfo := o.modifyAuthInfo(*startingStanza)
-	config.AuthInfos[o.name] = &authInfo
+	config.AuthInfos[o.Name] = &authInfo
 
-	if err := clientcmd.ModifyConfig(o.configAccess, *config, true); err != nil {
+	if err := clientcmd.ModifyConfig(o.ConfigAccess, *config, true); err != nil {
 		return err
 	}
 
@@ -208,14 +208,14 @@ func (o createAuthInfoOptions) run() error {
 }
 
 // authInfo builds an AuthInfo object from the options
-func (o *createAuthInfoOptions) modifyAuthInfo(existingAuthInfo clientcmdapi.AuthInfo) clientcmdapi.AuthInfo {
+func (o *CreateAuthInfoOptions) modifyAuthInfo(existingAuthInfo clientcmdapi.AuthInfo) clientcmdapi.AuthInfo {
 	modifiedAuthInfo := existingAuthInfo
 
 	var setToken, setBasic bool
 
-	if o.clientCertificate.Provided() {
-		certPath := o.clientCertificate.Value()
-		if o.embedCertData.Value() {
+	if o.ClientCertificate.Provided() {
+		certPath := o.ClientCertificate.Value()
+		if o.EmbedCertData.Value() {
 			modifiedAuthInfo.ClientCertificateData, _ = ioutil.ReadFile(certPath)
 			modifiedAuthInfo.ClientCertificate = ""
 		} else {
@@ -226,9 +226,9 @@ func (o *createAuthInfoOptions) modifyAuthInfo(existingAuthInfo clientcmdapi.Aut
 			}
 		}
 	}
-	if o.clientKey.Provided() {
-		keyPath := o.clientKey.Value()
-		if o.embedCertData.Value() {
+	if o.ClientKey.Provided() {
+		keyPath := o.ClientKey.Value()
+		if o.EmbedCertData.Value() {
 			modifiedAuthInfo.ClientKeyData, _ = ioutil.ReadFile(keyPath)
 			modifiedAuthInfo.ClientKey = ""
 		} else {
@@ -240,21 +240,21 @@ func (o *createAuthInfoOptions) modifyAuthInfo(existingAuthInfo clientcmdapi.Aut
 		}
 	}
 
-	if o.token.Provided() {
-		modifiedAuthInfo.Token = o.token.Value()
+	if o.Token.Provided() {
+		modifiedAuthInfo.Token = o.Token.Value()
 		setToken = len(modifiedAuthInfo.Token) > 0
 	}
 
-	if o.username.Provided() {
-		modifiedAuthInfo.Username = o.username.Value()
+	if o.Username.Provided() {
+		modifiedAuthInfo.Username = o.Username.Value()
 		setBasic = setBasic || len(modifiedAuthInfo.Username) > 0
 	}
-	if o.password.Provided() {
-		modifiedAuthInfo.Password = o.password.Value()
+	if o.Password.Provided() {
+		modifiedAuthInfo.Password = o.Password.Value()
 		setBasic = setBasic || len(modifiedAuthInfo.Password) > 0
 	}
-	if o.authProvider.Provided() {
-		newName := o.authProvider.Value()
+	if o.AuthProvider.Provided() {
+		newName := o.AuthProvider.Value()
 
 		// Only overwrite if the existing auth-provider is nil, or different than the newly specified one.
 		if modifiedAuthInfo.AuthProvider == nil || modifiedAuthInfo.AuthProvider.Name != newName {
@@ -268,16 +268,16 @@ func (o *createAuthInfoOptions) modifyAuthInfo(existingAuthInfo clientcmdapi.Aut
 		if modifiedAuthInfo.AuthProvider.Config == nil {
 			modifiedAuthInfo.AuthProvider.Config = make(map[string]string)
 		}
-		for _, toRemove := range o.authProviderArgsToRemove {
+		for _, toRemove := range o.AuthProviderArgsToRemove {
 			delete(modifiedAuthInfo.AuthProvider.Config, toRemove)
 		}
-		for key, value := range o.authProviderArgs {
+		for key, value := range o.AuthProviderArgs {
 			modifiedAuthInfo.AuthProvider.Config[key] = value
 		}
 	}
 
-	if o.execCommand.Provided() {
-		newExecCommand := o.execCommand.Value()
+	if o.ExecCommand.Provided() {
+		newExecCommand := o.ExecCommand.Value()
 
 		// create new Exec if doesn't exist, otherwise just modify the command
 		if modifiedAuthInfo.Exec == nil {
@@ -293,21 +293,21 @@ func (o *createAuthInfoOptions) modifyAuthInfo(existingAuthInfo clientcmdapi.Aut
 
 	// modify next values only if Exec exists, ignore these changes otherwise
 	if modifiedAuthInfo.Exec != nil {
-		if o.execAPIVersion.Provided() {
-			modifiedAuthInfo.Exec.APIVersion = o.execAPIVersion.Value()
+		if o.ExecAPIVersion.Provided() {
+			modifiedAuthInfo.Exec.APIVersion = o.ExecAPIVersion.Value()
 		}
 
 		// rewrite exec arguments list with new values
-		if o.execArgs != nil {
-			modifiedAuthInfo.Exec.Args = o.execArgs
+		if o.ExecArgs != nil {
+			modifiedAuthInfo.Exec.Args = o.ExecArgs
 		}
 
 		// iterate over the existing exec env values and remove the specified
-		if o.execEnvToRemove != nil {
+		if o.ExecEnvToRemove != nil {
 			newExecEnv := []clientcmdapi.ExecEnvVar{}
 			for _, value := range modifiedAuthInfo.Exec.Env {
 				needToRemove := false
-				for _, elemToRemove := range o.execEnvToRemove {
+				for _, elemToRemove := range o.ExecEnvToRemove {
 					if value.Name == elemToRemove {
 						needToRemove = true
 						break
@@ -321,9 +321,9 @@ func (o *createAuthInfoOptions) modifyAuthInfo(existingAuthInfo clientcmdapi.Aut
 		}
 
 		// update or create specified environment variables for the exec plugin
-		if o.execEnv != nil {
+		if o.ExecEnv != nil {
 			newEnv := []clientcmdapi.ExecEnvVar{}
-			for newEnvName, newEnvValue := range o.execEnv {
+			for newEnvName, newEnvValue := range o.ExecEnv {
 				needToCreate := true
 				for i := 0; i < len(modifiedAuthInfo.Exec.Env); i++ {
 					if modifiedAuthInfo.Exec.Env[i].Name == newEnvName {
@@ -356,68 +356,68 @@ func (o *createAuthInfoOptions) modifyAuthInfo(existingAuthInfo clientcmdapi.Aut
 	return modifiedAuthInfo
 }
 
-func (o *createAuthInfoOptions) complete(cmd *cobra.Command, out io.Writer) error {
+func (o *CreateAuthInfoOptions) complete(cmd *cobra.Command, out io.Writer) error {
 	args := cmd.Flags().Args()
 	if len(args) != 1 {
 		return fmt.Errorf("Unexpected args: %v", args)
 	}
 
-	authProviderArgs, err := cmd.Flags().GetStringSlice(flagAuthProviderArg)
+	authProviderArgs, err := cmd.Flags().GetStringSlice(FlagAuthProviderArg)
 	if err != nil {
 		return fmt.Errorf("Error: %s", err)
 	}
 
 	if len(authProviderArgs) > 0 {
-		newPairs, removePairs, err := cmdutil.ParsePairs(authProviderArgs, flagAuthProviderArg, true)
+		newPairs, removePairs, err := cmdutil.ParsePairs(authProviderArgs, FlagAuthProviderArg, true)
 		if err != nil {
 			return fmt.Errorf("Error: %s", err)
 		}
-		o.authProviderArgs = newPairs
-		o.authProviderArgsToRemove = removePairs
+		o.AuthProviderArgs = newPairs
+		o.AuthProviderArgsToRemove = removePairs
 	}
 
-	execArgs, err := cmd.Flags().GetStringSlice(flagExecArg)
+	execArgs, err := cmd.Flags().GetStringSlice(FlagExecArg)
 	if err != nil {
 		return fmt.Errorf("Error: %s", err)
 	}
 	if len(execArgs) > 0 {
-		o.execArgs = execArgs
+		o.ExecArgs = execArgs
 	}
 
-	execEnv, err := cmd.Flags().GetStringArray(flagExecEnv)
+	execEnv, err := cmd.Flags().GetStringArray(FlagExecEnv)
 	if err != nil {
 		return fmt.Errorf("Error: %s", err)
 	}
 	if len(execEnv) > 0 {
-		newPairs, removePairs, err := cmdutil.ParsePairs(execEnv, flagExecEnv, true)
+		newPairs, removePairs, err := cmdutil.ParsePairs(execEnv, FlagExecEnv, true)
 		if err != nil {
 			return fmt.Errorf("Error: %s", err)
 		}
-		o.execEnv = newPairs
-		o.execEnvToRemove = removePairs
+		o.ExecEnv = newPairs
+		o.ExecEnvToRemove = removePairs
 	}
 
-	o.name = args[0]
+	o.Name = args[0]
 	return nil
 }
 
-func (o createAuthInfoOptions) validate() error {
-	if len(o.name) == 0 {
+func (o CreateAuthInfoOptions) validate() error {
+	if len(o.Name) == 0 {
 		return errors.New("you must specify a non-empty user name")
 	}
 	methods := []string{}
-	if len(o.token.Value()) > 0 {
+	if len(o.Token.Value()) > 0 {
 		methods = append(methods, fmt.Sprintf("--%v", clientcmd.FlagBearerToken))
 	}
-	if len(o.username.Value()) > 0 || len(o.password.Value()) > 0 {
+	if len(o.Username.Value()) > 0 || len(o.Password.Value()) > 0 {
 		methods = append(methods, fmt.Sprintf("--%v/--%v", clientcmd.FlagUsername, clientcmd.FlagPassword))
 	}
 	if len(methods) > 1 {
 		return fmt.Errorf("you cannot specify more than one authentication method at the same time: %v", strings.Join(methods, ", "))
 	}
-	if o.embedCertData.Value() {
-		certPath := o.clientCertificate.Value()
-		keyPath := o.clientKey.Value()
+	if o.EmbedCertData.Value() {
+		certPath := o.ClientCertificate.Value()
+		keyPath := o.ClientKey.Value()
 		if certPath == "" && keyPath == "" {
 			return fmt.Errorf("you must specify a --%s or --%s to embed", clientcmd.FlagCertFile, clientcmd.FlagKeyFile)
 		}

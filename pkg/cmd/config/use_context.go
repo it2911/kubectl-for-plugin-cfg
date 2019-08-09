@@ -36,14 +36,14 @@ var (
 		kubectl config use-context minikube`)
 )
 
-type useContextOptions struct {
-	configAccess clientcmd.ConfigAccess
-	contextName  string
+type UseContextOptions struct {
+	ConfigAccess clientcmd.ConfigAccess
+	ContextName  string
 }
 
 // NewCmdConfigUseContext returns a Command instance for 'config use-context' sub command
 func NewCmdConfigUseContext(out io.Writer, configAccess clientcmd.ConfigAccess) *cobra.Command {
-	options := &useContextOptions{configAccess: configAccess}
+	options := &UseContextOptions{ConfigAccess: configAccess}
 
 	cmd := &cobra.Command{
 		Use:                   "use-context CONTEXT_NAME",
@@ -55,15 +55,15 @@ func NewCmdConfigUseContext(out io.Writer, configAccess clientcmd.ConfigAccess) 
 		Run: func(cmd *cobra.Command, args []string) {
 			cmdutil.CheckErr(options.complete(cmd))
 			cmdutil.CheckErr(options.run())
-			fmt.Fprintf(out, "Switched to context %q.\n", options.contextName)
+			fmt.Fprintf(out, "Switched to context %q.\n", options.ContextName)
 		},
 	}
 
 	return cmd
 }
 
-func (o useContextOptions) run() error {
-	config, err := o.configAccess.GetStartingConfig()
+func (o UseContextOptions) run() error {
+	config, err := o.ConfigAccess.GetStartingConfig()
 	if err != nil {
 		return err
 	}
@@ -73,31 +73,31 @@ func (o useContextOptions) run() error {
 		return err
 	}
 
-	config.CurrentContext = o.contextName
+	config.CurrentContext = o.ContextName
 
-	return clientcmd.ModifyConfig(o.configAccess, *config, true)
+	return clientcmd.ModifyConfig(o.ConfigAccess, *config, true)
 }
 
-func (o *useContextOptions) complete(cmd *cobra.Command) error {
+func (o *UseContextOptions) complete(cmd *cobra.Command) error {
 	endingArgs := cmd.Flags().Args()
 	if len(endingArgs) != 1 {
 		return helpErrorf(cmd, "Unexpected args: %v", endingArgs)
 	}
 
-	o.contextName = endingArgs[0]
+	o.ContextName = endingArgs[0]
 	return nil
 }
 
-func (o useContextOptions) validate(config *clientcmdapi.Config) error {
-	if len(o.contextName) == 0 {
+func (o UseContextOptions) validate(config *clientcmdapi.Config) error {
+	if len(o.ContextName) == 0 {
 		return errors.New("empty context names are not allowed")
 	}
 
 	for name := range config.Contexts {
-		if name == o.contextName {
+		if name == o.ContextName {
 			return nil
 		}
 	}
 
-	return fmt.Errorf("no context exists with the name: %q", o.contextName)
+	return fmt.Errorf("no context exists with the name: %q", o.ContextName)
 }
